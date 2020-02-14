@@ -11,6 +11,11 @@ Parameters:
     Type: String
     AllowedPattern: (\d{12}|^$)
     ConstraintDescription: Must be an AWS account ID
+  QaAwsAccountId:
+    Description: AWS account ID for qa account
+    Type: String
+    AllowedPattern: (\d{12}|^$)
+    ConstraintDescription: Must be an AWS account ID
   ProdAwsAccountId:
     Description: AWS account ID for production account
     Type: String
@@ -224,6 +229,7 @@ Resources:
               - sts:AssumeRole
             Resource:
               - !Sub arn:aws:iam::${DevAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${DevAwsAccountId}-dev
+              - !Sub arn:aws:iam::${QaAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${QaAwsAccountId}-qa
               - !Sub arn:aws:iam::${ProdAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${ProdAwsAccountId}-prod
 
   DynamicPipelineCleanupLambda:
@@ -368,7 +374,9 @@ Resources:
             Resource:
               - !Ref PipelineServiceRoleArn
               - !Sub arn:aws:iam::${DevAwsAccountId}:role/CodePipelineDeploymentRole-${AWS::Region}-${DevAwsAccountId}-dev
+              - !Sub arn:aws:iam::${QaAwsAccountId}:role/CodePipelineDeploymentRole-${AWS::Region}-${QaAwsAccountId}-qa
               - !Sub arn:aws:iam::${DevAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${DevAwsAccountId}-dev
+              - !Sub arn:aws:iam::${QaAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${QaAwsAccountId}-qa
           - Effect: Allow
             Action:
               - codepipeline:CreatePipeline
