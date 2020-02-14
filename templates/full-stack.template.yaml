@@ -109,7 +109,7 @@ Resources:
         DevAwsAccountId: !Ref DevAwsAccountId
         QaAwsAccountId: !Ref QaAwsAccountId
         ProdAwsAccountId: !Ref ProdAwsAccountId
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/account.template.yaml
+      TemplateURL: !Sub https://raw.githubusercontent.com/WarGot-by/cloud-formation/master/templates/account.template.yaml
       TimeoutInMinutes: 60
 
   LambdaStack:
@@ -125,7 +125,7 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/lambda.template.yaml
+      TemplateURL: !Sub https://raw.githubusercontent.com/WarGot-by/cloud-formation/master/templates/lambda.template.yaml
       TimeoutInMinutes: 60
 
   CrossAccountStackDev:
@@ -136,7 +136,7 @@ Resources:
         QuickStartStackMakerLambda: !GetAtt LambdaStack.Outputs.QuickStartStackMakerLambda
         Stage: dev
         ChildAccountRoleName: !Ref DevChildAccountRoleName
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cross-account.template.yaml
+      TemplateURL: !Sub https://raw.githubusercontent.com/WarGot-by/cloud-formation/master/templates/cross-account.template.yaml
       TimeoutInMinutes: 60
 
   CrossAccountStackQa:
@@ -147,7 +147,7 @@ Resources:
         QuickStartStackMakerLambda: !GetAtt LambdaStack.Outputs.QuickStartStackMakerLambda
         Stage: dev
         ChildAccountRoleName: !Ref DevChildAccountRoleName
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cross-account.template.yaml
+      TemplateURL: !Sub https://raw.githubusercontent.com/WarGot-by/cloud-formation/master/templates/cross-account.template.yaml
       TimeoutInMinutes: 60
 
   CrossAccountStackProd:
@@ -158,7 +158,7 @@ Resources:
         QuickStartStackMakerLambda: !GetAtt LambdaStack.Outputs.QuickStartStackMakerLambda
         Stage: prod
         ChildAccountRoleName: !Ref ProdChildAccountRoleName
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cross-account.template.yaml
+      TemplateURL: !Sub https://raw.githubusercontent.com/WarGot-by/cloud-formation/master/templates/cross-account.template.yaml
       TimeoutInMinutes: 60
 
   ProjectSetupStack:
@@ -180,7 +180,7 @@ Resources:
         ArtifactBucketKeyArn: !GetAtt AccountStack.Outputs.ArtifactBucketKeyArn
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
         PipelineServiceRoleArn: !GetAtt AccountStack.Outputs.PipelineServiceRoleArn
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/project.template.yaml
+      TemplateURL: !Sub https://raw.githubusercontent.com/WarGot-by/cloud-formation/master/templates/project.template.yaml
       TimeoutInMinutes: 60
 
   ProjectPipelineStack:
@@ -200,7 +200,7 @@ Resources:
         SecretArnDev: !GetAtt ProjectSetupStack.Outputs.SecretArnDev
         SecretArnProd: !GetAtt ProjectSetupStack.Outputs.SecretArnProd
         SecretsManagerKey: !GetAtt ProjectSetupStack.Outputs.SecretsManagerKey
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/pipeline.template.yaml
+      TemplateURL: !Sub https://raw.githubusercontent.com/WarGot-by/cloud-formation/master/templates/pipeline.template.yaml
       TimeoutInMinutes: 60
 
   CleanUpSamBuckets:
