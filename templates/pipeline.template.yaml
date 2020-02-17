@@ -19,6 +19,12 @@ Parameters:
     AllowedPattern: (\d{12}|^$)
     ConstraintDescription: Must be an AWS account ID
     Default: '159527342995'
+  QaAwsAccountId:
+    Description: AWS account ID for qa account
+    Type: String
+    AllowedPattern: (\d{12}|^$)
+    ConstraintDescription: Must be an AWS account ID
+    Default: '159527342995'
   ProdAwsAccountId:
     Description: AWS account ID for production account
     Type: String
