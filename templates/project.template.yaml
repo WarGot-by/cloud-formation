@@ -125,7 +125,7 @@ Resources:
     Condition: AddQaAccountPermissions
     Type: AWS::SecretsManager::ResourcePolicy
     Properties:
-      SecretId: !Ref SecretDev
+      SecretId: !Ref SecretQa
       ResourcePolicy:
         Version: '2012-10-17'
         Statement:
@@ -206,7 +206,7 @@ Resources:
     Properties:
       RepositoryName: !Ref AppName
       Triggers:
-        - CustomData: !Sub '{"SecretArnDev": "${SecretDev}","SecretArnQa": "${SecretDev}","SecretsManagerKey": "${SecretsManagerKey.Arn}","AppName": "${AppName}","BuildImageName": "${BuildImageName}","ArtifactBucket": "${ArtifactBucket}","ArtifactBucketKeyArn": "${ArtifactBucketKeyArn}","SamTranslationBucket": "${SamTranslationBucket}","PipelineServiceRoleArn": "${PipelineServiceRoleArn}","DevAwsAccountId": "${DevAwsAccountId}","QaAwsAccountId": "${QaAwsAccountId}"}'
+        - CustomData: !Sub '{"SecretArnDev": "${SecretDev}","SecretArnQa": "${SecretQa}","SecretsManagerKey": "${SecretsManagerKey.Arn}","AppName": "${AppName}","BuildImageName": "${BuildImageName}","ArtifactBucket": "${ArtifactBucket}","ArtifactBucketKeyArn": "${ArtifactBucketKeyArn}","SamTranslationBucket": "${SamTranslationBucket}","PipelineServiceRoleArn": "${PipelineServiceRoleArn}","DevAwsAccountId": "${DevAwsAccountId}","QaAwsAccountId": "${QaAwsAccountId}"}'
           DestinationArn: !Ref DynamicPipelineMakerLambdaArn
           Events:
             - createReference

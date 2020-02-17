@@ -70,6 +70,10 @@ Resources:
                   - !Sub arn:aws:iam::${DevAwsAccountId}:root
                   - !Ref AWS::NoValue
                 - !If
+                  - AddQaAccountPermissions
+                  - !Sub arn:aws:iam::${QaAwsAccountId}:root
+                  - !Ref AWS::NoValue
+                - !If
                   - AddProdAccountPermissions
                   - !Sub arn:aws:iam::${ProdAwsAccountId}:root
                   - !Ref AWS::NoValue
@@ -190,6 +194,10 @@ Resources:
                   - !Sub arn:aws:iam::${DevAwsAccountId}:root
                   - !Ref AWS::NoValue
                 - !If
+                  - AddQaAccountPermissions
+                  - !Sub arn:aws:iam::${QaAwsAccountId}:root
+                  - !Ref AWS::NoValue
+                - !If
                   - AddProdAccountPermissions
                   - !Sub arn:aws:iam::${ProdAwsAccountId}:root
                   - !Ref AWS::NoValue
@@ -260,6 +268,10 @@ Resources:
                 - !If
                   - AddDevAccountPermissions
                   - !Sub arn:aws:iam::${DevAwsAccountId}:root
+                  - !Ref AWS::NoValue
+                - !If
+                  - AddQaAccountPermissions
+                  - !Sub arn:aws:iam::${QaAwsAccountId}:root
                   - !Ref AWS::NoValue
                 - !If
                   - AddProdAccountPermissions
