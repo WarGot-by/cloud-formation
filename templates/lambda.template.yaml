@@ -405,7 +405,7 @@ Resources:
       Environment:
         Variables:
           LOGGING_LEVEL: INFO
-          TemplateURL: !Sub https://raw.githubusercontent.com/WarGot-by/cloud-formation/master/templates/pipeline.template.yaml
+          TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/pipeline.template.yaml
           StackName: !Ref AWS::StackName
           DynamicPipelineCleanupLambdaArn: !GetAtt DynamicPipelineCleanupLambda.Arn
       Code:
