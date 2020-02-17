@@ -206,7 +206,7 @@ Resources:
     Properties:
       RepositoryName: !Ref AppName
       Triggers:
-        - CustomData: !Sub '{"SecretArnDev": "${SecretDev}","SecretsManagerKey": "${SecretsManagerKey.Arn}","AppName": "${AppName}","BuildImageName": "${BuildImageName}","ArtifactBucket": "${ArtifactBucket}","ArtifactBucketKeyArn": "${ArtifactBucketKeyArn}","SamTranslationBucket": "${SamTranslationBucket}","PipelineServiceRoleArn": "${PipelineServiceRoleArn}","DevAwsAccountId": "${DevAwsAccountId}"}'
+        - CustomData: !Sub '{"SecretArnDev": "${SecretDev}","SecretArnQa": "${SecretDev}","SecretsManagerKey": "${SecretsManagerKey.Arn}","AppName": "${AppName}","BuildImageName": "${BuildImageName}","ArtifactBucket": "${ArtifactBucket}","ArtifactBucketKeyArn": "${ArtifactBucketKeyArn}","SamTranslationBucket": "${SamTranslationBucket}","PipelineServiceRoleArn": "${PipelineServiceRoleArn}","DevAwsAccountId": "${DevAwsAccountId}","QaAwsAccountId": "${QaAwsAccountId}"}'
           DestinationArn: !Ref DynamicPipelineMakerLambdaArn
           Events:
             - createReference
@@ -262,6 +262,13 @@ Outputs:
       !If
       - AddDevAccountPermissions
       - !Ref SecretDev
+      - ''
+  SecretArnQa:
+    Description: Qa secret ARN
+    Value:
+      !If
+      - AddQaAccountPermissions
+      - !Ref SecretQa
       - ''
   SecretArnProd:
     Description: Prod secret ARN
