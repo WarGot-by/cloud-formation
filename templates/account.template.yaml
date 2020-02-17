@@ -11,6 +11,12 @@ Parameters:
     AllowedPattern: (\d{12}|^$)
     ConstraintDescription: Must be an AWS account ID
     Default: '159527342995'
+  QaAwsAccountId:
+    Description: AWS account ID for qa account
+    Type: String
+    AllowedPattern: (\d{12}|^$)
+    ConstraintDescription: Must be an AWS account ID
+    Default: '159527342995'
   ProdAwsAccountId:
     Description: AWS account ID for production account
     Type: String
@@ -20,6 +26,7 @@ Parameters:
 
 Conditions:
   AddDevAccountPermissions: !Not [!Equals [ !Ref DevAwsAccountId, '' ]]
+  AddQaAccountPermissions: !Not [!Equals [ !Ref QaAwsAccountId, '' ]]
   AddProdAccountPermissions: !And [!Not [!Equals [ !Ref ProdAwsAccountId, '' ]],
                                    !Not [!Equals [ !Ref DevAwsAccountId, !Ref ProdAwsAccountId  ]]]
 
@@ -118,6 +125,7 @@ Resources:
                   - sts:AssumeRole
                 Resource:
                   - !Sub arn:aws:iam::${DevAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${DevAwsAccountId}-dev
+                  - !Sub arn:aws:iam::${QaAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${QaAwsAccountId}-qa
                   - !Sub arn:aws:iam::${ProdAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${ProdAwsAccountId}-prod
               - Resource: '*'
                 Effect: Allow
