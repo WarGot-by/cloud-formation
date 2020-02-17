@@ -51,6 +51,9 @@ Parameters:
   SecretArnDev:
     Description: ARN for Secrets Manager secret for dev
     Type: String
+  SecretArnQa:
+    Description: ARN for Secrets Manager secret for qa
+    Type: String
   SecretArnProd:
     Description: ARN for Secrets Manager secret for production
     Type: String
@@ -61,6 +64,7 @@ Parameters:
 
 Conditions:
   IsProdStage: !Equals [ !Ref Branch, 'master' ]
+  IsQaStage: !Equals [ !Ref Branch, 'staging' ]
 
 Resources:
   PipelineNotificationsTopic:
@@ -81,6 +85,19 @@ Resources:
           - IsProdStage
           - !Sub ${AppName}-dev
           - !Sub ${AppName}-dev-${Suffix}
+
+  DynamicPipelineCleanupQa:
+    Type: "AWS::CloudFormation::CustomResource"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !Ref DynamicPipelineCleanupLambdaArn
+      RoleArn: !Sub arn:aws:iam::${QaAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${QaAwsAccountId}-qa
+      Region: !Ref AWS::Region
+      StackName:
+        !If
+        - IsProdStage
+        - !Sub ${AppName}-qa
+        - !Sub ${AppName}-qa-${Suffix}
 
   DynamicPipelineCleanupProd:
     Condition: IsProdStage
@@ -265,6 +282,8 @@ Resources:
             Value: !Ref SamTranslationBucket
           - Name: SECRET_ARN_DEV
             Value: !Ref SecretArnDev
+          - Name: SECRET_ARN_QA
+            Value: !Ref SecretArnQa
           - Name: SECRET_ARN_PROD
             Value: !Ref SecretArnProd
           - Name: SECRET_MANAGER_KEY
@@ -295,6 +314,31 @@ Resources:
           - Name: ROLE_ARN
             Type: PLAINTEXT
             Value: !Sub arn:aws:iam::${DevAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${DevAwsAccountId}-dev
+      ServiceRole: !Ref PipelineServiceRoleArn
+
+  SmokeTestQaProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec.smoketest.yaml
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: !Ref BuildImageName
+        EnvironmentVariables:
+          - Name: STACK_NAME
+            Type: PLAINTEXT
+            Value:
+              !If
+              - IsProdStage
+              - !Sub ${AppName}-qa
+              - !Sub ${AppName}-qa-${Suffix}
+          - Name: ROLE_ARN
+            Type: PLAINTEXT
+            Value: !Sub arn:aws:iam::${QaAwsAccountId}:role/CodePipelineServiceRole-${AWS::Region}-${QaAwsAccountId}-qa
       ServiceRole: !Ref PipelineServiceRoleArn
 
   SmokeTestProdProject:

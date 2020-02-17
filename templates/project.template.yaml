@@ -15,6 +15,12 @@ Parameters:
     AllowedPattern: (\d{12}|^$)
     ConstraintDescription: Must be an AWS account ID
     Default: '159527342995'
+  QaAwsAccountId:
+    Description: AWS account ID for development account
+    Type: String
+    AllowedPattern: (\d{12}|^$)
+    ConstraintDescription: Must be an AWS account ID
+    Default: '159527342995'
   ProdAwsAccountId:
     Description: AWS account ID for production account
     Type: String
@@ -46,6 +52,7 @@ Parameters:
 
 Conditions:
   AddDevAccountPermissions: !Not [!Equals [ !Ref DevAwsAccountId, '' ]]
+  AddQaAccountPermissions: !Not [!Equals [ !Ref QaAwsAccountId, '' ]]
   AddProdAccountPermissions: !Not [!Equals [ !Ref ProdAwsAccountId, '' ]]
 
 Resources:
@@ -64,6 +71,21 @@ Resources:
       Tags:
         - Key: Stage
           Value: dev
+  SecretQa:
+    Condition: AddQaAccountPermissions
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Secret to define sensitive data for application in child accounts (QA)
+      KmsKeyId: !GetAtt SecretsManagerKey.Arn
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "sample-user"}'
+        GenerateStringKey: "password"
+        PasswordLength: 30
+        ExcludeCharacters: '"@/\'
+      Name: !Sub sample-secret-${AWS::Region}-${AWS::AccountId}-qa
+      Tags:
+        - Key: Stage
+          Value: qa
   SecretProd:
     Condition: AddProdAccountPermissions
     Type: AWS::SecretsManager::Secret
@@ -92,6 +114,25 @@ Resources:
             Principal:
               AWS:
                 - !Sub arn:aws:iam::${DevAwsAccountId}:role/SampleLambdaRole-${AWS::Region}-${DevAwsAccountId}-dev
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: '*'
+            Condition:
+              ForAnyValue:StringEquals: # Only the latest secret can be retrieved (per best practices)
+                secretsmanager:VersionStage: AWSCURRENT
+
+  SecretPolicyQa:
+    Condition: AddQaAccountPermissions
+    Type: AWS::SecretsManager::ResourcePolicy
+    Properties:
+      SecretId: !Ref SecretDev
+      ResourcePolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:aws:iam::${QaAwsAccountId}:role/SampleLambdaRole-${AWS::Region}-${QaAwsAccountId}-qa
             Action:
               - secretsmanager:GetSecretValue
             Resource: '*'
@@ -134,13 +175,17 @@ Resources:
             Action:
               - kms:*
             Resource: '*'
-          - Sid: Allow the dev and prod accounts to the key
+          - Sid: Allow the dev, qa and prod accounts to the key
             Effect: Allow
             Principal:
               AWS:
                 - !If
                   - AddDevAccountPermissions
                   - !Sub arn:aws:iam::${DevAwsAccountId}:role/SampleLambdaRole-${AWS::Region}-${DevAwsAccountId}-dev
+                  - !Ref AWS::NoValue
+                - !If
+                  - AddQaAccountPermissions
+                  - !Sub arn:aws:iam::${QaAwsAccountId}:role/SampleLambdaRole-${AWS::Region}-${QaAwsAccountId}-qa
                   - !Ref AWS::NoValue
                 - !If
                   - AddProdAccountPermissions
@@ -156,7 +201,7 @@ Resources:
       AliasName: alias/secrets-manager
       TargetKeyId: !Ref SecretsManagerKey
 
-  RepositoryBackend:
+  Repository:
     Type: AWS::CodeCommit::Repository
     Properties:
       RepositoryName: !Ref AppName
@@ -168,60 +213,20 @@ Resources:
             - deleteReference
           Name: Create or delete dynamic pipeline for new branch
 
-  RepositoryFrontend:
-    Type: AWS::CodeCommit::Repository
-    Properties:
-      RepositoryName: !Ref AppName
-      Triggers:
-        - CustomData: !Sub '{"SecretArnDev": "${SecretDev}","SecretsManagerKey": "${SecretsManagerKey.Arn}","AppName": "${AppName}","BuildImageName": "${BuildImageName}","ArtifactBucket": "${ArtifactBucket}","ArtifactBucketKeyArn": "${ArtifactBucketKeyArn}","SamTranslationBucket": "${SamTranslationBucket}","PipelineServiceRoleArn": "${PipelineServiceRoleArn}","DevAwsAccountId": "${DevAwsAccountId}"}'
-          DestinationArn: !Ref DynamicPipelineMakerLambdaArn
-          Events:
-            - createReference
-            - deleteReference
-          Name: Create or delete dynamic pipeline for new branch
-
-  RepositoryTests:
-    Type: AWS::CodeCommit::Repository
-    Properties:
-      RepositoryName: !Ref AppName
-      Triggers:
-        - CustomData: !Sub '{"SecretArnDev": "${SecretDev}","SecretsManagerKey": "${SecretsManagerKey.Arn}","AppName": "${AppName}","BuildImageName": "${BuildImageName}","ArtifactBucket": "${ArtifactBucket}","ArtifactBucketKeyArn": "${ArtifactBucketKeyArn}","SamTranslationBucket": "${SamTranslationBucket}","PipelineServiceRoleArn": "${PipelineServiceRoleArn}","DevAwsAccountId": "${DevAwsAccountId}"}'
-          DestinationArn: !Ref DynamicPipelineMakerLambdaArn
-          Events:
-            - createReference
-            - deleteReference
-          Name: Create or delete dynamic pipeline for new branch
-
-  DynamicPipelineMakerLambdaPermissionBackend:
-    Type: AWS::Lambda::Permission
-    Properties: 
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref DynamicPipelineMakerLambdaArn
-      Principal: codecommit.amazonaws.com
-      SourceArn: !GetAtt RepositoryBackend.Arn
-
-  DynamicPipelineMakerLambdaPermissionFrontend:
+  DynamicPipelineMakerLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref DynamicPipelineMakerLambdaArn
       Principal: codecommit.amazonaws.com
-      SourceArn: !GetAtt RepositoryFrontend.Arn
-
-  DynamicPipelineMakerLambdaPermissionTests:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref DynamicPipelineMakerLambdaArn
-      Principal: codecommit.amazonaws.com
-      SourceArn: !GetAtt RepositoryTests.Arn
+      SourceArn: !GetAtt Repository.Arn
 
   RepositoryUser:
     Type: AWS::IAM::User
     Properties:
       UserName: !Sub AWS-CICD-Quickstart-${AppName}-${AWS::Region}-${AWS::AccountId}
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/cd
+        - arn:aws:iam::aws:policy/AWSCodeCommitPowerUser
 
   CodecommitCredentials:
     Type: AWS::CloudFormation::CustomResource
@@ -237,7 +242,7 @@ Outputs:
     Description: KMS key for the use of secrets across accounts
     Value: !GetAtt SecretsManagerKey.Arn
   RepoCloneUrlHttp:
-    Description: URL for HTTP loning 
+    Description: URL for HTTP loning
     Value: !GetAtt Repository.CloneUrlHttp
   RepoCloneUrlSsh:
     Description: URL for SSH cloning
@@ -255,16 +260,16 @@ Outputs:
     Description: Dev secret ARN
     Value:
       !If
-        - AddDevAccountPermissions
-        - !Ref SecretDev
-        - ''
+      - AddDevAccountPermissions
+      - !Ref SecretDev
+      - ''
   SecretArnProd:
     Description: Prod secret ARN
     Value:
       !If
-        - AddProdAccountPermissions
-        - !Ref SecretProd
-        - ''
+      - AddProdAccountPermissions
+      - !Ref SecretProd
+      - ''
   GitUserName:
     Description: Username for access to the CodeCommit repository
     Value: !GetAtt CodecommitCredentials.UserName

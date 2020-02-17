@@ -143,10 +143,10 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        AwsAccountId: !Ref DevAwsAccountId
+        AwsAccountId: !Ref QaAwsAccountId
         QuickStartStackMakerLambda: !GetAtt LambdaStack.Outputs.QuickStartStackMakerLambda
         Stage: dev
-        ChildAccountRoleName: !Ref DevChildAccountRoleName
+        ChildAccountRoleName: !Ref QaChildAccountRoleName
       TemplateURL: !Sub https://raw.githubusercontent.com/WarGot-by/cloud-formation/master/templates/cross-account.template.yaml
       TimeoutInMinutes: 60
 
@@ -198,6 +198,7 @@ Resources:
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
         PipelineServiceRoleArn: !GetAtt AccountStack.Outputs.PipelineServiceRoleArn
         SecretArnDev: !GetAtt ProjectSetupStack.Outputs.SecretArnDev
+        SecretArnQa: !GetAtt ProjectSetupStack.Outputs.SecretArnQa
         SecretArnProd: !GetAtt ProjectSetupStack.Outputs.SecretArnProd
         SecretsManagerKey: !GetAtt ProjectSetupStack.Outputs.SecretsManagerKey
       TemplateURL: !Sub https://raw.githubusercontent.com/WarGot-by/cloud-formation/master/templates/pipeline.template.yaml
