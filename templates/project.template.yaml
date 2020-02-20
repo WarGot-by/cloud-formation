@@ -49,9 +49,6 @@ Parameters:
   SamTranslationBucket:
     Description: S3 bucket for SAM translations
     Type: String
-  DeployTranslationBucket:
-    Description: DeployTranslationBucket bucket for SAM translations
-    Type: String
 
 Conditions:
   AddDevAccountPermissions: !Not [!Equals [ !Ref DevAwsAccountId, '' ]]

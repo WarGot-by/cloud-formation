@@ -128,7 +128,6 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
-        DeployTranslationBucket: !GetAtt AccountStack.Outputs.DeployTranslationBucket
       TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/lambda.template.yaml
       TimeoutInMinutes: 60
 
@@ -183,7 +182,6 @@ Resources:
         ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
         ArtifactBucketKeyArn: !GetAtt AccountStack.Outputs.ArtifactBucketKeyArn
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
-        DeployTranslationBucket: !GetAtt AccountStack.Outputs.DeployTranslationBucket
         PipelineServiceRoleArn: !GetAtt AccountStack.Outputs.PipelineServiceRoleArn
       TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/project.template.yaml
       TimeoutInMinutes: 60
@@ -201,7 +199,6 @@ Resources:
         ArtifactBucketKeyArn: !GetAtt AccountStack.Outputs.ArtifactBucketKeyArn
         ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
-        DeployTranslationBucket: !GetAtt AccountStack.Outputs.DeployTranslationBucket
         PipelineServiceRoleArn: !GetAtt AccountStack.Outputs.PipelineServiceRoleArn
         SecretArnDev: !GetAtt ProjectSetupStack.Outputs.SecretArnDev
         SecretArnQa: !GetAtt ProjectSetupStack.Outputs.SecretArnQa

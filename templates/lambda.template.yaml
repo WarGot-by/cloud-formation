@@ -46,9 +46,7 @@ Parameters:
   SamTranslationBucket:
     Description: S3 bucket for SAM translations
     Type: String
-  DeployTranslationBucket:
-    Description: DeployTranslationBucket bucket for SAM translations
-    Type: String
+
 Resources:
   QuickStartStackMakerLambdaRole:
     Type: AWS::IAM::Role

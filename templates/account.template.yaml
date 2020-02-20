@@ -31,70 +31,6 @@ Conditions:
                                    !Not [!Equals [ !Ref DevAwsAccountId, !Ref ProdAwsAccountId  ]]]
 
 Resources:
-  DeployBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      WebsiteConfiguration:
-        IndexDocument: index.html
-
-  DeployBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref DeployBucket
-      PolicyDocument:
-        Statement:
-          - Action:
-              - s3:*
-            Effect: Allow
-            Resource:
-              - !Sub ${DeployBucket.Arn}
-              - !Sub ${DeployBucket.Arn}/*
-            Principal:
-              AWS:
-                - !Sub arn:aws:iam::${AWS::AccountId}:root
-          - Action:
-              - s3:GetObject
-              - s3:ListBucket
-            Effect: Allow
-            Resource:
-              - !Sub ${DeployBucket.Arn}
-              - !Sub ${DeployBucket.Arn}/*
-            Principal:
-              AWS:
-                - !If
-                  - AddDevAccountPermissions
-                  - !Sub arn:aws:iam::${DevAwsAccountId}:root
-                  - !Ref AWS::NoValue
-                - !If
-                  - AddQaAccountPermissions
-                  - !Sub arn:aws:iam::${QaAwsAccountId}:root
-                  - !Ref AWS::NoValue
-                - !If
-                  - AddProdAccountPermissions
-                  - !Sub arn:aws:iam::${ProdAwsAccountId}:root
-                  - !Ref AWS::NoValue
-
-  Distribution:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Origins:
-          -
-            DomainName: !GetAtt DeployBucket.DomainName
-            Id: !Ref DeployBucket
-            S3OriginConfig:
-              OriginAccessIdentity: ''
-        DefaultRootObject: index.html
-        Enabled: true
-        # Configure the caching behavior for our CDN
-        DefaultCacheBehavior:
-          MinTTL: 86400  # 1 day
-          MaxTTL: 31536000  # 1 year
-          ForwardedValues:
-            QueryString: true
-          TargetOriginId: !Ref DeployBucket
-          ViewerProtocolPolicy: "redirect-to-https"   # we want to force HTTPS
-
   SamBucket:
     DependsOn: ArtifactBucketKey
     Type: AWS::S3::Bucket
@@ -211,8 +147,6 @@ Resources:
               - !Sub ${ArtifactBucket.Arn}/*
               - !GetAtt SamBucket.Arn
               - !Sub ${SamBucket.Arn}/*
-              - !GetAtt DeployBucket.Arn
-              - !Sub ${DeployBucket.Arn}/*
             Effect: Allow
             Action:
                 - s3:PutObject
@@ -363,6 +297,3 @@ Outputs:
   ArtifactBucketAliasName:
     Description: KMS key alias for codepipelines and artifacts
     Value: !Ref ArtifactBucketAlias
-  DeployTranslationBucket:
-    Description: Bucket used when packaging SAM templates
-    Value: !Ref DeployBucket
