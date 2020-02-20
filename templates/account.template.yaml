@@ -363,6 +363,6 @@ Outputs:
   ArtifactBucketAliasName:
     Description: KMS key alias for codepipelines and artifacts
     Value: !Ref ArtifactBucketAlias
-  DeployBucket:
+  DeployTranslationBucket:
     Description: Bucket used when packaging SAM templates
     Value: !Ref DeployBucket
