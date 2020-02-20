@@ -37,6 +37,43 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
 
+  DeployBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DeployBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:*
+            Effect: Allow
+            Resource:
+              - !Sub ${DeployBucket.Arn}
+              - !Sub ${DeployBucket.Arn}/*
+            Principal:
+              AWS:
+                - !Sub arn:aws:iam::${AWS::AccountId}:root
+          - Action:
+              - s3:GetObject
+              - s3:ListBucket
+            Effect: Allow
+            Resource:
+              - !Sub ${DeployBucket.Arn}
+              - !Sub ${DeployBucket.Arn}/*
+            Principal:
+              AWS:
+                - !If
+                  - AddDevAccountPermissions
+                  - !Sub arn:aws:iam::${DevAwsAccountId}:root
+                  - !Ref AWS::NoValue
+                - !If
+                  - AddQaAccountPermissions
+                  - !Sub arn:aws:iam::${QaAwsAccountId}:root
+                  - !Ref AWS::NoValue
+                - !If
+                  - AddProdAccountPermissions
+                  - !Sub arn:aws:iam::${ProdAwsAccountId}:root
+                  - !Ref AWS::NoValue
+
   Distribution:
     Type: AWS::CloudFront::Distribution
     Properties:
