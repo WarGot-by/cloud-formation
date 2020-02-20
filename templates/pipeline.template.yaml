@@ -51,6 +51,9 @@ Parameters:
   SamTranslationBucket:
     Description: S3 bucket for SAM translations
     Type: String
+  DeployTranslationBucket:
+    Description: S3 bucket for SAM translations
+    Type: String
   DynamicPipelineCleanupLambdaArn:
     Description: ARN of Lambda function to clean up dynamic pipeline
     Type: String
@@ -286,6 +289,8 @@ Resources:
             Value: !Ref AWS::AccountId
           - Name: SAM_BUCKET
             Value: !Ref SamTranslationBucket
+          - Name: DEPLOY_BUCKET
+            Value: !Ref DeployTranslationBucket
           - Name: SECRET_ARN_DEV
             Value: !Ref SecretArnDev
           - Name: SECRET_ARN_QA

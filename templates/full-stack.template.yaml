@@ -57,16 +57,19 @@ Parameters:
     Type: String
     AllowedPattern: (\d{12}|^$)
     ConstraintDescription: Must be an AWS account ID
+    Default: 591601611851
   QaAwsAccountId:
     Description: AWS account ID for qa account
     Type: String
     AllowedPattern: (\d{12}|^$)
     ConstraintDescription: Must be an AWS account ID
+    Default: 151457001141
   ProdAwsAccountId:
     Description: AWS account ID for production account
     Type: String
     AllowedPattern: (\d{12}|^$)
     ConstraintDescription: Must be an AWS account ID
+    Default: 342182917111
   AppName:
     Description: Application name, used for the repository and child stack name
     Type: String
@@ -78,13 +81,13 @@ Parameters:
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
-    Default: aws-quickstart
+    Default: mlc-formation
     Description: S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)
     Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: AWS Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start with forward slash (/) because that is automatically appended.
-    Default: quickstart-trek10-serverless-enterprise-cicd/
+    Default: ''
     Description: S3 key prefix for the AWS Quick Start assets. AWS Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start with forward slash (/) because that is automatically appended. It will typically end with a forward slash.
     Type: String
   ProdChildAccountRoleName:
@@ -125,6 +128,7 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
+        DeployTranslationBucket: !GetAtt AccountStack.Outputs.DeployTranslationBucket
       TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/lambda.template.yaml
       TimeoutInMinutes: 60
 
@@ -179,6 +183,7 @@ Resources:
         ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
         ArtifactBucketKeyArn: !GetAtt AccountStack.Outputs.ArtifactBucketKeyArn
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
+        DeployTranslationBucket: !GetAtt AccountStack.Outputs.DeployTranslationBucket
         PipelineServiceRoleArn: !GetAtt AccountStack.Outputs.PipelineServiceRoleArn
       TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/project.template.yaml
       TimeoutInMinutes: 60
@@ -196,6 +201,7 @@ Resources:
         ArtifactBucketKeyArn: !GetAtt AccountStack.Outputs.ArtifactBucketKeyArn
         ArtifactBucket: !GetAtt AccountStack.Outputs.PipelineArtifactBucket
         SamTranslationBucket: !GetAtt AccountStack.Outputs.SamTranslationBucket
+        DeployTranslationBucket: !GetAtt AccountStack.Outputs.DeployTranslationBucket
         PipelineServiceRoleArn: !GetAtt AccountStack.Outputs.PipelineServiceRoleArn
         SecretArnDev: !GetAtt ProjectSetupStack.Outputs.SecretArnDev
         SecretArnQa: !GetAtt ProjectSetupStack.Outputs.SecretArnQa
