@@ -145,7 +145,7 @@ Resources:
       Parameters:
         AwsAccountId: !Ref QaAwsAccountId
         QuickStartStackMakerLambda: !GetAtt LambdaStack.Outputs.QuickStartStackMakerLambda
-        Stage: dev
+        Stage: qa
         ChildAccountRoleName: !Ref QaChildAccountRoleName
       TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cross-account.template.yaml
       TimeoutInMinutes: 60
