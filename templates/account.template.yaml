@@ -294,7 +294,7 @@ Resources:
   ArtifactBucketAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: alias/artifact-bucket
+      AliasName: alias/artifact-bucket-frontend
       TargetKeyId: !Ref ArtifactBucketKey
 
   ArtifactBucket:
