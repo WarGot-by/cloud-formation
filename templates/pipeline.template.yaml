@@ -294,6 +294,12 @@ Resources:
             Value: !Ref SecretArnProd
           - Name: SECRET_MANAGER_KEY
             Value: !Ref SecretsManagerKey
+          - Name: DEV_AWS_ACCOUNT_ID
+            Value: !Ref DevAwsAccountId
+          - Name: QA_AWS_ACCOUNT_ID
+            Value: !Ref QaAwsAccountId
+          - Name: PROD_AWS_ACCOUNT_ID
+            Value: !Ref ProdAwsAccountId
       ServiceRole: !Ref PipelineServiceRoleArn
       EncryptionKey: !Ref ArtifactBucketKeyArn
 
